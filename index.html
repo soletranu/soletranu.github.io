@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<script src="http://code.jquery.com/jquery-2.1.0.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+		<link rel="stylesheet" type="text/css" href="style.css">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" ></script>
+		<title>Soletrando</title>
+	</head>
+	<body>
+		<div style="height: 100%;position: absolute;width: 100%;display: flex;justify-content: center;">
+			<div id="init" class="panel panel-default" style=" max-width: 300px;height: 150px;align-self: center;">
+				<div class="panel-heading" style="text-align: center;">
+					Informe o seu nome
+				</div>  
+				<div class="panel-body">
+					<input type="text" class="form-control" name="name" id="name">
+					<div style="margin-top: 10px;display: flex;justify-content: center;">
+						<button type="submit" class="btn btn-primary" onclick="initGame()">Iniciar</button>
+						</div>
+				</div>
+			</div>
+			<div id="game" class="panel panel-default" style=" max-width: 500px;height: 300px;align-self: center;">
+				<div class="panel-heading" style="text-align: center;">
+					<h2 id="nameLabel">NameLabel</h2>
+				</div>  
+				<div class="panel-body">
+					<div class="row">
+						<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" >
+							Pontos:
+							<span id="points">0</span>
+						</div>
+						<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 text-center" >
+							Pulos:
+							<span id="skips">3</span>
+						</div>
+						<div class="col-xs-4 col-sm-4 col-md-4 col-lg-4 text-right" >
+							Tempo:
+							<span id="time">30</span>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col-md-12">
+							<div style="margin-top: 10px;display: flex;justify-content: center;">
+								<div class="row">
+									<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-center">
+										<button type="button" class="btn btn-default" onclick="speakActualWord()" id="btnOuvir">Ouvir</button>
+										<button type="button" class="btn btn-default" onclick="speakActualDefinition()" id="btnDefinicao">Definição</button>
+										<button type="button" class="btn btn-default" onclick="skipWord()" id="btnPular">Pular</button>
+										<button type="button" class="btn btn-default" onclick="getTip()" id="btnDica">Dica</button>
+									</div>
+									<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 mt-lg">
+										<input type="text" class="form-control" name="name" id="word" placeholder="Digite a palavra aqui">
+									</div>
+									<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-center mt-lg">
+										<button type="button" class="btn btn-primary" onclick="verifyWord()">Enviar</button>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="./config.js" ></script>
+		<script type="text/javascript" src="./app.js" ></script>
+	</body>
+</html>

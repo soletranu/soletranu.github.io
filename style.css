@@ -1,0 +1,13 @@
+.t {
+	height: 100%;
+	position: absolute;
+	width: 100%;
+	display: flex;
+}
+.r {
+	align-self: center;
+}
+.mt-lg{
+	margin-top: 15px;
+}
+
